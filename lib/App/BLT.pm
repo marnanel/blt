@@ -4,7 +4,8 @@ use strict;
 use warnings;
 
 # Globals (since we're an ad-hoc library):
-our ($home, $pid_filename, %rc_settings, $last_fetch_filename, $timeline, $VERSION);
+our ($home, $pid_filename, %rc_settings, $last_fetch_filename,
+    $timeline, $check_public, $VERSION);
 
 sub print_masthead {
   print <<EOT;
@@ -26,9 +27,9 @@ Choose at most one mode:
   -a, --as=USER = post as USER, if you add them in ~/.bltrc.xml
 
 Switches:
-  -F, --force = always check, even if we checked recently
-  -S, --sync  = don't check in the background
-  -P, --public= read the public timeline (not for posting!)
+  -F, --force  = always check, even if we checked recently
+  -S, --sync   = don't check in the background
+  -P, --public = read the public timeline (not for posting!)
 EOT
 }
 
@@ -100,11 +101,13 @@ sub twitter_useragent {
   # Create a user agent object
   my $ua = LWP::UserAgent->new(timeout => 5);
 
-  # TODO: don't authenticate if they're asking for -c -P
-  $ua->credentials('twitter.com:80', 'Twitter API',
-    $rc_settings{user},
-    $rc_settings{pass},
-  );
+  # Dn't authenticate if they're asking for -c -P
+  unless ($check_public) {
+      $ua->credentials('twitter.com:80', 'Twitter API',
+          $rc_settings{user},
+          $rc_settings{pass},
+      );
+  }
 
   $ua->default_header('X-Twitter-Client' => 'blt');
   $ua->default_header('X-Twitter-Client-Version' => $VERSION);
@@ -148,9 +151,11 @@ sub twitter_following {
     "http://twitter.com/statuses/${timeline}_timeline.xml",
   );
 
-  open LAST_FETCH, ">$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
-  print LAST_FETCH time;
-  close LAST_FETCH or die "Can't close $last_fetch_filename: $!";
+  unless ($check_public) {
+    open LAST_FETCH, ">$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
+    print LAST_FETCH time;
+    close LAST_FETCH or die "Can't close $last_fetch_filename: $!";
+  }
 
   if ($response->code == 500 && $response->status_line =~ /Can't connect/) {
     return "blt: failed to reach twitter; won't check again for a while\n".$response->status_line."\n";

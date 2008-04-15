@@ -13,7 +13,7 @@ my $home = $ENV{HOME} || (getpwuid($<))[7];
 our $rc_filename = "$home/.bltrc.xml";
 our $pid_filename = "$home/.blt_pid";
 
-my ($check, $set,
+our ($check, $set,
   $sync, $force, $help, $version, $username,
   $check_public);
 
@@ -40,10 +40,8 @@ if ($help) {
   exit(1);
 }
 
-our $timeline = 'friends';
-$timeline = 'public' if $check_public;
-
-our $last_fetch_filename = "$home/.blt_last_fetch_$timeline";
+our $last_fetch_filename = "$home/.blt_last_fetch";
+our $timeline = $check_public? 'public': 'friends';
 
 our (%rc_settings, $last_fetch);
 
@@ -76,9 +74,13 @@ if (-e $rc_filename) {
   die "User was not found in $rc_filename\n"
     unless defined $rc_settings{'user'} && defined $rc_settings{'pass'};
 
-} else {
+} elsif ($check && $check_public) {
+  # We're doing a public timeline check but without a config file.
+  # We can do this, but we need to supply some results.
+  $rc_settings{'interval'} = 60;
 
-  # TODO: there is no need for this if they are currently asking for -c -P
+} else {
+  # Okay, just create it.
 
   print_masthead();
   print "Hi! It looks like you haven't used blt before. To get started,\n";
@@ -103,6 +105,12 @@ if (-e $rc_filename) {
   print RC "<?xml version=\"1.0\"?>\n<bltrc interval=\"60\">";
   print RC "<ac id=\"$user\" pass=\"$pass\"/></bltrc>\n";
   close RC or die "Can't close file $rc_filename: $!\n";
+
+  %rc_settings = (
+    %rc_settings,
+    'user' => $user,
+    'pass' => $pass,
+  );
 
   # Also attempt to put ourselves into PROMPT_COMMAND in ~/.bashrc
   add_to_bashrc();
@@ -277,4 +285,13 @@ select it using the F<-a> switch; see above under SWITCHES.
 
 =head1 BUGS
 
- * It can send but not receive direct messages.
+=over 4
+=item
+It can send but not receive direct messages.
+
+=item
+blt is pretty fast, but you still might not want to run blt
+from ~/.bashrc on a particularly slow computer.
+
+=back 4
+
