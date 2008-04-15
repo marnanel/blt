@@ -17,6 +17,7 @@ my ($check, $set,
   $sync, $force, $help, $version, $username,
   $check_public);
 
+Getopt::Long::Configure ("bundling");
 GetOptions(
   'check|c'   => \$check,
   'set|s'     => \$set,
