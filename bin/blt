@@ -185,6 +185,7 @@ if ($check) {
   twitter_post($status);
 
 } else {
+  print_masthead();
   print_help();
 }
 
