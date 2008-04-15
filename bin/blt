@@ -108,6 +108,9 @@ if (-e $rc_filename) {
 }
 
 # TODO: Use file date of empty file rather than reading file
+# FIXME: This is wrong; $last_fetch_filename shouldn't include timeline
+# FIXME: ...name because it only applies to friends; public timeline has
+# FIXME: ...no rate limit.  Remove the rate limit for public timeline.
 if (-e $last_fetch_filename) {
   open LASTFETCH, "<$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
   $last_fetch = <LASTFETCH>;
@@ -263,7 +266,7 @@ The configuration file is a simple piece f XML called ~/.bltrc.xml.
 Its root node is F<bltrc>, which has one attribute, F<interval>.
 This is the minimum time that must pass between fetching information
 from Twitter.  (The Twitter acceptale use policy requires this to
-be at least NN FIXME seconds.)
+be at least 52 seconds.)
 
 Within this root element are a number of F<ac> elements, each
 representing an account, with F<id> and F<pass> elements.
