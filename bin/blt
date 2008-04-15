@@ -11,11 +11,11 @@ use vars qw($VERSION);
 $VERSION = '0.20';
 my $home = $ENV{HOME} || (getpwuid($<))[7];
 our $rc_filename = "$home/.bltrc.xml";
-our $last_fetch_filename = "$home/.blt_last_fetch";
 our $pid_filename = "$home/.blt_pid";
 
 my ($check, $set,
-  $sync, $force, $help, $version, $username);
+  $sync, $force, $help, $version, $username,
+  $check_public);
 
 GetOptions(
   'check|c'   => \$check,
@@ -24,6 +24,7 @@ GetOptions(
   'version|v' => \$version,
   'force|F'   => \$force,
   'sync|S'    => \$sync,
+  'public|P'  => \$check_public,
   'as|a=s'    => \$username,
  );
 
@@ -37,6 +38,11 @@ if ($help) {
   print_help();
   exit(1);
 }
+
+our $timeline = 'friends';
+$timeline = 'public' if $check_public;
+
+our $last_fetch_filename = "$home/.blt_last_fetch_$timeline";
 
 our (%rc_settings, $last_fetch);
 
@@ -99,6 +105,7 @@ if (-e $rc_filename) {
   add_to_bashrc();
 }
 
+# TODO: Use file date of empty file rather than reading file
 if (-e $last_fetch_filename) {
   open LASTFETCH, "<$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
   $last_fetch = <LASTFETCH>;
@@ -137,7 +144,6 @@ if ($check) {
         # And now we've printed it, delete the content.
         unlink $content_filename;
       }
-
     }
 
     # Anyway, whatever, it's too soon to check, so we should leave.
@@ -179,6 +185,7 @@ if ($check) {
 } elsif (@ARGV) {
 
   # so it must be --set, the default.
+  die "You can't post to the public timeline!" if $check_public;
 
   my $status = join(' ', @ARGV);
   

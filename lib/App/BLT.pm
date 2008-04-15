@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 
-our ($home, $pid_filename, %rc_settings, $last_fetch_filename);
+# Globals (since we're an ad-hoc library):
+our ($home, $pid_filename, %rc_settings, $last_fetch_filename, $timeline, $VERSION);
 
 sub print_masthead {
   print <<EOT;
@@ -27,6 +28,7 @@ Choose at most one mode:
 Switches:
   -F, --force = always check, even if we checked recently
   -S, --sync  = don't check in the background
+  -P, --public= read the public timeline (not for posting!)
 EOT
 }
 
@@ -104,7 +106,7 @@ sub twitter_useragent {
   );
 
   $ua->default_header('X-Twitter-Client' => 'blt');
-  $ua->default_header('X-Twitter-Client-Version' => 'prealpha');
+  $ua->default_header('X-Twitter-Client-Version' => $VERSION);
   $ua->default_header('X-Twitter-Client-URL' => 'http://marnanel.org/projects/blt/');
 
   return $ua;
@@ -142,7 +144,7 @@ sub twitter_following {
   }
 
   my $response = $ua->get(
-    'http://twitter.com/statuses/friends_timeline.xml',
+    "http://twitter.com/statuses/${timeline}_timeline.xml",
   );
 
   open LAST_FETCH, ">$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
