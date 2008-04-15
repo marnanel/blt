@@ -77,6 +77,8 @@ if (-e $rc_filename) {
 
 } else {
 
+  # TODO: there is no need for this if they are currently asking for -c -P
+
   print_masthead();
   print "Hi! It looks like you haven't used blt before. To get started,\n";
   print "I'll just need two pieces of information about your twitter\n";

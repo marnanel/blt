@@ -100,6 +100,7 @@ sub twitter_useragent {
   # Create a user agent object
   my $ua = LWP::UserAgent->new(timeout => 5);
 
+  # TODO: don't authenticate if they're asking for -c -P
   $ua->credentials('twitter.com:80', 'Twitter API',
     $rc_settings{user},
     $rc_settings{pass},
