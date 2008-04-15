@@ -158,8 +158,6 @@ sub twitter_following {
   return '' if $response->code == 304; # Not Modified
   die $response->status_line unless $response->is_success;
 
-  use Data::Dumper;
-
   my (@results, $screenname, $text);
 
   for (@{parsefile(new IO::Scalar \($response->content))->[0]->{'content'}}) {
