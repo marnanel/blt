@@ -117,9 +117,6 @@ if (-e $rc_filename) {
 }
 
 # TODO: Use file date of empty file rather than reading file
-# FIXME: This is wrong; $last_fetch_filename shouldn't include timeline
-# FIXME: ...name because it only applies to friends; public timeline has
-# FIXME: ...no rate limit.  Remove the rate limit for public timeline.
 if (-e $last_fetch_filename) {
   open LASTFETCH, "<$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
   $last_fetch = <LASTFETCH>;
