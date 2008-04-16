@@ -29,7 +29,7 @@ our ($check, $set,
     %rc_settings);
 
 @ISA = qw(Exporter);
-$VERSION = '0.20';
+$VERSION = '0.21';
 # Well, since we're mainly here so that most of blt's functionality can
 # live in module space, let's export almost everything.  This needs
 # cleaning up later, really, because it's not elegant.
