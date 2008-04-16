@@ -21,7 +21,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
   NAME            => 'blt',
   AUTHOR          => 'Thomas Thurman <tthurman@gnome.org>',
-  VERSION_FROM    => 'bin/blt',
+  VERSION_FROM    => 'lib/App/BLT.pm',
   PREREQ_PM       => {
     'Getopt::Long'  => 0,
     'XML::Tiny'     => 0,

@@ -22,16 +22,6 @@ use Getopt::Long;
 use XML::Tiny qw(parsefile);
 use IO::Scalar;
 use App::BLT;
-use vars qw($VERSION);
-
-$VERSION = '0.20';
-our $home = $ENV{HOME} || (getpwuid($<))[7];
-our $rc_filename = "$home/.bltrc.xml";
-our $pid_filename = "$home/.blt_pid";
-
-our ($check, $set,
-  $sync, $force, $help, $version, $username,
-  $check_public);
 
 Getopt::Long::Configure ("bundling");
 GetOptions(
@@ -56,10 +46,7 @@ if ($help) {
   exit(1);
 }
 
-our $last_fetch_filename = "$home/.blt_last_fetch";
-our $timeline = $check_public? 'public': 'friends';
-
-our (%rc_settings, $last_fetch);
+$timeline = $check_public? 'public': 'friends';
 
 if (-e $rc_filename) {
 

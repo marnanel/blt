@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (C) 2007-8 Thomas Thurman <tthurman@gnome.org>
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -16,13 +14,34 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
+package App::BLT;
+
 use strict;
 use warnings;
 use Cwd 'abs_path';
+use vars qw($VERSION @EXPORT @ISA);
+use XML::Tiny qw(parsefile);
+require Exporter;
 
-# Globals (since we're an ad-hoc library):
-our ($home, $pid_filename, %rc_settings, $last_fetch_filename,
-    $timeline, $check_public, $VERSION);
+our ($check, $set,
+    $sync, $force, $help, $version, $username,
+    $check_public,
+    %rc_settings);
+
+@ISA = qw(Exporter);
+$VERSION = '0.20';
+# Well, since we're mainly here so that most of blt's functionality can
+# live in module space:
+@EXPORT = qw(twitter_post twitter_following print_masthead print_help
+             $check $set $help $version $force $sync $check_public $username
+             %rc_settings $timeline $last_fetch_filename $home $pid_filename
+             $rc_filename $last_fetch);
+
+our $home = $ENV{HOME} || (getpwuid($<))[7];
+our $rc_filename = "$home/.bltrc.xml";
+our $pid_filename = "$home/.blt_pid";
+our $last_fetch_filename = "$home/.blt_last_fetch";
+our $timeline;
 
 sub print_masthead {
   print <<EOT;
@@ -51,7 +70,7 @@ EOT
 }
 
 sub add_to_bashrc {
-  my $bashrc = "$home/.bashrc";
+  my $bashrc = "$main::home/.bashrc";
 
   if (-e $bashrc) { # if they don't have one, don't bother checking
 
@@ -81,12 +100,12 @@ sub add_to_bashrc {
 sub already_running_in_background {
   if (-e $pid_filename) {
 
-    my @stats = stat($pid_filename);
+    my @stats = stat($main::pid_filename);
     my $age = time-($stats[9]);
 
     if ($age > 60) {
       # oh, that's just silly. Nobody takes a whole minute
-      unlink $pid_filename;
+      unlink $main::pid_filename;
       return 0;
     }
 
