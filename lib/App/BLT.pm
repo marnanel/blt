@@ -51,7 +51,6 @@ sub add_to_bashrc {
 
   print "\nAttempting to add ourselves to $bashrc...";
 
-  # FIXME: this is broken; $0 may be a relative path
   my $program = abs_path($0);
   open BASHRC, ">>$bashrc" or die "Can't open $bashrc: $!";
   print BASHRC "\n\n# Added by $program\nexport PROMPT_COMMAND=\"$program --check\"\n"
