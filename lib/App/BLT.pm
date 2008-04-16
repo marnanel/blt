@@ -31,8 +31,10 @@ our ($check, $set,
 @ISA = qw(Exporter);
 $VERSION = '0.20';
 # Well, since we're mainly here so that most of blt's functionality can
-# live in module space:
+# live in module space, let's export almost everything.  This needs
+# cleaning up later, really, because it's not elegant.
 @EXPORT = qw(twitter_post twitter_following print_masthead print_help
+             already_running_in_background
              $check $set $help $version $force $sync $check_public $username
              %rc_settings $timeline $last_fetch_filename $home $pid_filename
              $rc_filename $last_fetch);
