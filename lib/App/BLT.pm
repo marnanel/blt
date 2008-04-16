@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Cwd 'abs_path';
 
 # Globals (since we're an ad-hoc library):
 our ($home, $pid_filename, %rc_settings, $last_fetch_filename,
@@ -51,8 +52,9 @@ sub add_to_bashrc {
   print "\nAttempting to add ourselves to $bashrc...";
 
   # FIXME: this is broken; $0 may be a relative path
+  my $program = abs_path($0);
   open BASHRC, ">>$bashrc" or die "Can't open $bashrc: $!";
-  print BASHRC "\n\n# Added by $0\nexport PROMPT_COMMAND=\"$0 --check\"\n"
+  print BASHRC "\n\n# Added by $program\nexport PROMPT_COMMAND=\"$program --check\"\n"
         or die "Can't write to $bashrc: $!";
   close BASHRC or die "Can't close $bashrc: $!";
 

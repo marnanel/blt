@@ -9,7 +9,7 @@ use App::BLT;
 use vars qw($VERSION);
 
 $VERSION = '0.20';
-my $home = $ENV{HOME} || (getpwuid($<))[7];
+our $home = $ENV{HOME} || (getpwuid($<))[7];
 our $rc_filename = "$home/.bltrc.xml";
 our $pid_filename = "$home/.blt_pid";
 
