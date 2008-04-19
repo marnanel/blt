@@ -25,7 +25,7 @@ WriteMakefile(
   PREREQ_PM       => {
     'Getopt::Long'  => 0,
     'XML::Tiny'     => 0,
-    'IO::Scalar'    => 0,
+    'Test::More'    => 0,
   },
   PM              => {
     'lib/App/BLT.pm' => '$(INST_LIBDIR)/App/BLT.pm'

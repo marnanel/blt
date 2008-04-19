@@ -18,7 +18,7 @@ package App::BLT;
 
 use strict;
 use warnings;
-use Cwd 'abs_path';
+use Cwd qw(abs_path);
 use vars qw($VERSION @EXPORT @ISA);
 use XML::Tiny qw(parsefile);
 require Exporter;
@@ -29,7 +29,7 @@ our ($check, $set,
     %rc_settings);
 
 @ISA = qw(Exporter);
-$VERSION = '0.21';
+$VERSION = '0.22';
 # Well, since we're mainly here so that most of blt's functionality can
 # live in module space, let's export almost everything.  This needs
 # cleaning up later, really, because it's not elegant.
@@ -204,7 +204,8 @@ sub twitter_following {
 
   my (@results, $screenname, $text);
 
-  for (@{parsefile(new IO::Scalar \($response->content))->[0]->{'content'}}) {
+  open my $fh, '<', \$response->content;
+  for (@{parsefile($fh)->[0]->{'content'}}) {
 
     for my $field (@{ $_->{'content'} }) {
       if ($field->{'name'} eq 'text') {
@@ -221,6 +222,7 @@ sub twitter_following {
 
     push @results, [$screenname, $text];
   }
+  close $fh;
 
   my $result = '';
 

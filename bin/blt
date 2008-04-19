@@ -20,7 +20,6 @@ use strict;
 use warnings;
 use Getopt::Long;
 use XML::Tiny qw(parsefile);
-use IO::Scalar;
 use App::BLT;
 
 Getopt::Long::Configure ("bundling");
