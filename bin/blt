@@ -118,16 +118,15 @@ if (-e $rc_filename) {
   add_to_bashrc();
 }
 
-# TODO: Use file date of empty file rather than reading file
+# TODO: Use file date of empty file to ensure we don't check too often!
+# TODO: Friends timelines are distinct per user! (LP #220879)
 if (-e $last_fetch_filename) {
-  open LASTFETCH, "<$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
-  $last_fetch = <LASTFETCH>;
-  close LASTFETCH or die "Can't close $last_fetch_filename: $!";
-
-  die "The file $last_fetch_filename has become corrupted; please delete it ".
-    "and run $0 again" unless defined $last_fetch;
-} else {
-  $last_fetch = 0;
+  my $document;
+  # run it through eval because parsefile may choke on old versions
+  eval { $document = parsefile($last_fetch_filename); };
+  if ($document) {
+    $last_fetch = $document->[0]->{'attrib'}->{'tweet'} || 0;
+  }
 }
 
 # ...and we're off!

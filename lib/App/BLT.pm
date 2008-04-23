@@ -44,6 +44,7 @@ our $rc_filename = "$home/.bltrc.xml";
 our $pid_filename = "$home/.blt_pid";
 our $last_fetch_filename = "$home/.blt_last_fetch";
 our $timeline;
+our $last_fetch = 0; # a tweet ID
 
 sub print_masthead {
   print <<EOT;
@@ -172,11 +173,15 @@ sub twitter_post {
 
 sub twitter_following {
 
+  # $since is a tweet ID.
   my ($since) = @_;
 
+  my $greatest_tweet_seen = $since;
   my $ua = twitter_useragent();
 
-  if (defined $since) {
+  # This is disabled because it doesn't work and causes loss of tweets.
+  # May be removed from the code later.
+  if (0 and defined $since) {
     eval {
       require POSIX; import POSIX qw(setlocale LC_ALL strftime);
       setlocale(LC_ALL(), 'C');
@@ -189,12 +194,6 @@ sub twitter_following {
     "http://twitter.com/statuses/${timeline}_timeline.xml",
   );
 
-  unless ($check_public) {
-    open LAST_FETCH, ">$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
-    print LAST_FETCH time;
-    close LAST_FETCH or die "Can't close $last_fetch_filename: $!";
-  }
-
   if ($response->code == 500 && $response->status_line =~ /Can't connect/) {
     return "blt: failed to reach twitter; won't check again for a while\n".$response->status_line."\n";
   }
@@ -202,7 +201,7 @@ sub twitter_following {
   return '' if $response->code == 304; # Not Modified
   die $response->status_line unless $response->is_success;
 
-  my (@results, $screenname, $text);
+  my (@results, $screenname, $text, $tweetid);
 
   open my $fh, '<', \$response->content;
   for (@{parsefile($fh)->[0]->{'content'}}) {
@@ -217,19 +216,27 @@ sub twitter_following {
             last; # that's all we need to know about a user
           }
         }
+      } elsif ($field->{'name'} eq 'id') {
+        $tweetid = $field->{'content'}->[0]->{'content'};
+        $greatest_tweet_seen = $tweetid if $tweetid > $greatest_tweet_seen;
       }
     }
 
-    push @results, [$screenname, $text];
+    push @results, [$screenname, $text] if $tweetid > $since;
   }
   close $fh;
 
   my $result = '';
 
   foreach (@results) {
-
     my ($screenname, $text) = @{$_};
     $result .= "<$screenname> $text\n";
+  }
+
+  unless ($check_public) {
+    open LAST_FETCH, ">$last_fetch_filename" or die "Can't open $last_fetch_filename: $!";
+    print LAST_FETCH "<check tweet=\"$greatest_tweet_seen\"/>";
+    close LAST_FETCH or die "Can't close $last_fetch_filename: $!";
   }
 
   return $result;
